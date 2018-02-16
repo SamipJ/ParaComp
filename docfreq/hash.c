@@ -1,5 +1,4 @@
-#include "hash.h"
-#include <stdlib.h>
+#include "hash.h"	
 
 
 int hash(char *str,int m)
@@ -383,72 +382,121 @@ void printWords(wordNode* lht,int m){
 
 
 int main(){
-	FILE* fp;
-	fp=fopen("input1","r");
+	// FILE* fp;
+	// fp=fopen("input1","r");
     char * line = NULL,*saveptr1,*str1,*token,*p;
     size_t len = 0;
     ssize_t read;
     int j,k;
-    if (fp == NULL)
-        exit(EXIT_FAILURE);
+    // if (fp == NULL)
+        // exit(EXIT_FAILURE);
     int m= 1049;
-    wordDoc* ht = (wordDoc*)malloc(sizeof(wordDoc)*m);
-    while ((read = getline(&line, &len, fp)) != -1) {
-        // printf("Retrieved line of length %zu :\n", read);
-        // printf("%s", line);
-    	for (j = 1, str1 = line; ; j++, str1 = NULL) {
-	        token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
-            if (token == NULL)
-            	break;
-           	// printf("%d: %s %ld\n", j, token,strlen(token));
-           	p=token;
-           	for ( ; *p; ++p) *p = tolower(*p);
-           	k=(hash(token,m));
-           	ht[k]=addWordDoc(token,ht[k]);
-	    }
-	}
-    // printWordDoc(ht,m);
-    // printf("%s\n",token);
+    wordDoc* ht;
     wordNode* lht=(wordNode*)malloc(m*sizeof(wordNode));
-    lht=wordDoctowordNode(ht,"112",m,lht);
-    // printWords(lht,m);
+	 //    ht = (wordDoc*)malloc(sizeof(wordDoc)*m);
+	 //    while ((read = getline(&line, &len, fp)) != -1) {
+	 //        // printf("Retrieved line of length %zu :\n", read);
+	 //        // printf("%s", line);
+	 //    	for (j = 1, str1 = line; ; j++, str1 = NULL) {
+		//         token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
+	 //            if (token == NULL)
+	 //            	break;
+	 //           	// printf("%d: %s %ld\n", j, token,strlen(token));
+	 //           	p=token;
+	 //           	for ( ; *p; ++p) *p = tolower(*p);
+	 //           	k=(hash(token,m));
+	 //           	ht[k]=addWordDoc(token,ht[k]);
+		//     }
+		// }
+	    
+	 //    lht=wordDoctowordNode(ht,"112",m,lht);
+	 //    fclose(fp);
+	 //    fp=fopen("input2","r");
+	 //    line = NULL;
+	 //    saveptr1=NULL;
+	 //    str1=NULL;
+	 //    token=NULL;
+	 //    p=NULL;
+	 //    len = 0;
+	 //    read=0;
+	    
+	 //    if (fp == NULL)
+	 //        exit(EXIT_FAILURE);
+	 //    wordDoc* ht1 = (wordDoc*)malloc(sizeof(wordDoc)*m);
+	 //    while ((read = getline(&line, &len, fp)) != -1) {
+	 //        for (j = 1, str1 = line; ; j++, str1 = NULL) {
+		//         token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
+	 //           	p=token;
+	 //           	for ( ; *p; ++p) *p = tolower(*p);
+	 //           	k=(hash(token,m));
+	 //           	ht1[k]=addWordDoc(token,ht1[k]);
+		//     }
+		// }
+	 //    lht=wordDoctowordNode(ht1,"113",m,lht);
+	 //    printWords(lht,m);
 
-    fclose(fp);
+	 //    fclose(fp);
+//////////////////////////////////////
+    DIR* FD;
+    struct dirent* in_file;
+    FILE    *output_file;
+    FILE    *entry_file;
+    // char    buffer[BUFSIZ];
 
+    /* Opening common file for writing */
+    // output_file = fopen("rulesoutput.txt", "a+");
+    // if (output_file == NULL)
+    // {
+    //     fprintf(stderr, "Error : Failed to open output_file\n");
 
-    fp=fopen("input2","r");
-    line = NULL;
-    saveptr1=NULL;
-    str1=NULL;
-    token=NULL;
-    p=NULL;
-    len = 0;
-    read=0;
-    
-    if (fp == NULL)
-        exit(EXIT_FAILURE);
-    wordDoc* ht1 = (wordDoc*)malloc(sizeof(wordDoc)*m);
-    while ((read = getline(&line, &len, fp)) != -1) {
-        // printf("Retrieved line of length %zu :\n", read);
-        // printf("%s", line);
-    	for (j = 1, str1 = line; ; j++, str1 = NULL) {
-	        token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
-            if (token == NULL)
-            	break;
-           	// printf("%d: %s %ld\n", j, token,strlen(token));
-           	p=token;
-           	for ( ; *p; ++p) *p = tolower(*p);
-           	k=(hash(token,m));
-           	ht1[k]=addWordDoc(token,ht1[k]);
-	    }
-	}
-    // printWordDoc(ht,m);
-    // printf("%s\n",token);
-    // wordNode* lht=(wordNode*)malloc(m*sizeof(wordNode));
-    lht=wordDoctowordNode(ht1,"113",m,lht);
+    //     return 1;
+    // }
+
+    if (NULL == (FD = opendir ("files"))) 
+    {	
+        fprintf(stderr, "Error : Failed to open input directory\n");
+        // fclose(output_file);
+
+        return 1;
+    }
+    entry_file = fopen("files/input2", "rw");
+    if(entry_file==NULL){
+    	printf("asfsdfsdf\n");
+    }
+    while ((in_file = readdir(FD))) 
+    {
+        if (!strcmp (in_file->d_name, "."))
+            continue;
+        if (!strcmp (in_file->d_name, ".."))    
+            continue;
+  		printf("%s\n",in_file->d_name);
+        entry_file = fopen(in_file->d_name, "rw");
+        if (entry_file == NULL)
+        {
+            fprintf(stderr, "Error : Failed to open entry file\n");
+            // fclose(output_file);
+
+            return 1;
+        }
+        ht = (wordDoc*)malloc(sizeof(wordDoc)*m);
+	    while ((read = getline(&line, &len, entry_file)) != -1) {
+	    	for (j = 1, str1 = line; ; j++, str1 = NULL) {
+		        token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
+	            if (token == NULL)
+	            	break;
+	           	
+	           	for ( p=token; *p; ++p) *p = tolower(*p);
+	           	k=(hash(token,m));
+	           	ht[k]=addWordDoc(token,ht[k]);
+		    }
+		}
+		lht=wordDoctowordNode(ht,in_file->d_name,m,lht);
+		fclose(entry_file);
+    }
     printWords(lht,m);
 
-    fclose(fp);
+////////////////////////////////
+
     if (line)
         free(line);
     exit(EXIT_SUCCESS);

@@ -3,6 +3,10 @@
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <errno.h>
 // #include <mpi.h>
 
 
@@ -10,6 +14,7 @@ typedef struct docnode
 {
 	char* name;
 	int freq;
+	struct docnode* next;
 }docnode;
 
 typedef docnode* docNode;
@@ -39,7 +44,6 @@ typedef struct wordnode{
 }wordnode; 
 
 typedef wordnode* wordNode;
-
 
 int hash(char *str,int m);
 
