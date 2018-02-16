@@ -311,7 +311,7 @@ wordDoc* fill_ht(char* name,int m,wordDoc* ht,stopWord* sw){
 	return ht;
 }
 
-wordNode* fill_lht(int m,wordNode* lht){
+wordNode* fill_lht(int m,wordNode* lht,char* dirname,char* procid){
     wordDoc* ht = (wordDoc*)malloc(sizeof(wordDoc)*m);	
 	int i;
 	stopWord* sw=makeStopWords("stop",m);
@@ -322,8 +322,11 @@ wordNode* fill_lht(int m,wordNode* lht){
     FILE    *entry_file;
     char* name=(char*)malloc(256*sizeof(char));
 	char* filename;
-    char* file = (char*)malloc(7*sizeof(char));
-	strcpy(file,"files");
+    char* file = (char*)malloc((strlen(dirname)+1)*sizeof(char));
+	char* dirslash =(char*)malloc(sizeof(char)*(strlen(dirname+2)));
+	strcpy(file,dirname);
+	strcpy(dirslash,dirname);
+	strcat(dirslash,"/");
     if (NULL == (FD = opendir (file))) 
     {	
         fprintf(stderr, "Error : Failed to open input directory\n");
@@ -331,15 +334,17 @@ wordNode* fill_lht(int m,wordNode* lht){
     }
     while ((in_file = readdir(FD))) 
     {
-		strcpy(file,"files/");
+
+		strcpy(file,dirslash);
         if (!strcmp (in_file->d_name, "."))
             continue;
         if (!strcmp (in_file->d_name, ".."))    
             continue;
     	name=strcat(file,in_file->d_name);
-		filename=(char*)malloc(sizeof(char)*(strlen(in_file->d_name)+1));
+		filename=(char*)malloc(sizeof(char)*(strlen(in_file->d_name)+5));
 		strcpy(filename,in_file->d_name);
-    	printf("%s\n",file );
+		strcat(filename,procid);
+    	// printf("%s\n",file );
   		// printf("%s\n",in_file->d_name);
         ht = fill_ht(name,m,ht,sw);
 		lht=wordDoctowordNode(ht,filename,m,lht);
@@ -449,8 +454,16 @@ int main(){
     int m= 5000;
     // wordDoc* ht;
     wordNode* lht=(wordNode*)malloc(m*sizeof(wordNode));
-	lht = fill_lht(m,lht);
-    printWords(lht,m);
+	char* dirname =(char*)malloc(sizeof(char)*10);
+	char* procid =(char*)malloc(sizeof(char)*5);
+	char* pc=(char*)malloc(sizeof(char)*3);
+	int p=1;
+	sprintf(pc,"%d",p);
+	char* sqo =(char*)malloc(sizeof(char)*2);
+	strcpy(procid,strcat(strcat(strcpy(sqo,"["),pc),"]"));
+	strcpy(dirname,"files");
+	lht = fill_lht(m,lht,dirname,procid);
+    // printWords(lht,m);
 	// free_lht(lht,m);
 	// free(lht);			
 	return 0;
