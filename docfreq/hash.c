@@ -1,4 +1,4 @@
-#include "hash.h"	
+#include "hash.h"
 
 
 int hash(char *str,int m)
@@ -441,6 +441,9 @@ int main(){
     struct dirent* in_file;
     FILE    *output_file;
     FILE    *entry_file;
+    char* name=(char*)malloc(256*sizeof(char));
+    char* file = (char*)malloc(7*sizeof(char));
+    // strcpy(file,"files/");
     // char    buffer[BUFSIZ];
 
     /* Opening common file for writing */
@@ -459,23 +462,22 @@ int main(){
 
         return 1;
     }
-    entry_file = fopen("files/input2", "rw");
-    if(entry_file==NULL){
-    	printf("asfsdfsdf\n");
-    }
     while ((in_file = readdir(FD))) 
     {
+		strcpy(file,"files/");
+    	name=strcat(file,in_file->d_name);
+    	printf("%s\n",file );
         if (!strcmp (in_file->d_name, "."))
             continue;
         if (!strcmp (in_file->d_name, ".."))    
             continue;
   		printf("%s\n",in_file->d_name);
-        entry_file = fopen(in_file->d_name, "rw");
+        entry_file = fopen(name, "rw");
         if (entry_file == NULL)
         {
             fprintf(stderr, "Error : Failed to open entry file\n");
             // fclose(output_file);
-
+			// printWords(lht,m);
             return 1;
         }
         ht = (wordDoc*)malloc(sizeof(wordDoc)*m);
@@ -492,8 +494,10 @@ int main(){
 		}
 		lht=wordDoctowordNode(ht,in_file->d_name,m,lht);
 		fclose(entry_file);
+		strcpy(file,"files/");
     }
     printWords(lht,m);
+    			
 
 ////////////////////////////////
 
