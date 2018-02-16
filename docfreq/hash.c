@@ -36,7 +36,7 @@ wordNode newWord(char* key){
 docNode newDoc(char* name,int freq){
 	docNode temp=(docNode)malloc(sizeof(docnode));
 	temp->name=name;
-	// temp->nextDoc=NULL;
+	temp->next=NULL;
 	temp->freq=freq;
 	return temp;
 }
@@ -223,19 +223,55 @@ wordNode* wordDoctowordNode(wordDoc* ht,char* name,int m,wordNode* lht){
 }
 
 docNode addDoc(char* name,int freq,docNode head){
+	docNode temp=head,temp2=NULL;
+	if(temp==NULL){
+		temp=newDoc(name,freq);
+		head=temp;
+		return head;
+	}
+	else{
+		if(temp->freq<=freq){
+			temp2=newDoc(name,freq);
+			temp2->next=temp;
+			head=temp2;
+			return head;
+		}
+		else{
+			temp2=temp;
+			temp=temp->next;
+		}
+		while(temp!=NULL){
+			if(temp->freq<=freq){
+				temp2->next=newDoc(name,freq);
+				temp2=temp2->next;
+				temp2->next=temp;
+				return head;
+			}
+			temp2=temp;
+			temp=temp->next;
+		}
+		temp2->next=newDoc(name,freq);
+		return head;
+	}
 	return head;
 }
 
 void printWords(wordNode* lht,int m){
 	int i,count=0,strmax=0,strcount=0;
 	wordNode temp;
+	docNode tempDoc;
 	for(i=0;i<m;i++){
 		if(lht[i]==NULL) continue;
 		count++;		
 		temp = lht[i];
 		strcount=0;
 		while(temp!=NULL){
-			printf("%d : %s %d\n",i,temp->key,temp->totalfreq);
+			printf("%d : %s %d\nSplit:\n",i,temp->key,temp->totalfreq);
+			tempDoc=temp->docLink;
+			while(tempDoc!=NULL){
+				printf("%s-->%d\n",tempDoc->name,tempDoc->freq);
+				tempDoc=tempDoc->next;
+			}
 			temp=temp->next;
 			strcount++;
 		}
@@ -348,7 +384,7 @@ void printWords(wordNode* lht,int m){
 
 int main(){
 	FILE* fp;
-	fp=fopen("input","r");
+	fp=fopen("input1","r");
     char * line = NULL,*saveptr1,*str1,*token,*p;
     size_t len = 0;
     ssize_t read;
@@ -371,11 +407,46 @@ int main(){
            	ht[k]=addWordDoc(token,ht[k]);
 	    }
 	}
-    printWordDoc(ht,m);
+    // printWordDoc(ht,m);
     // printf("%s\n",token);
     wordNode* lht=(wordNode*)malloc(m*sizeof(wordNode));
-    // lht=wordDoctowordNode(ht,"112",m,lht);
+    lht=wordDoctowordNode(ht,"112",m,lht);
     // printWords(lht,m);
+
+    fclose(fp);
+
+
+    fp=fopen("input2","r");
+    line = NULL;
+    saveptr1=NULL;
+    str1=NULL;
+    token=NULL;
+    p=NULL;
+    len = 0;
+    read=0;
+    
+    if (fp == NULL)
+        exit(EXIT_FAILURE);
+    wordDoc* ht1 = (wordDoc*)malloc(sizeof(wordDoc)*m);
+    while ((read = getline(&line, &len, fp)) != -1) {
+        // printf("Retrieved line of length %zu :\n", read);
+        // printf("%s", line);
+    	for (j = 1, str1 = line; ; j++, str1 = NULL) {
+	        token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
+            if (token == NULL)
+            	break;
+           	// printf("%d: %s %ld\n", j, token,strlen(token));
+           	p=token;
+           	for ( ; *p; ++p) *p = tolower(*p);
+           	k=(hash(token,m));
+           	ht1[k]=addWordDoc(token,ht1[k]);
+	    }
+	}
+    // printWordDoc(ht,m);
+    // printf("%s\n",token);
+    // wordNode* lht=(wordNode*)malloc(m*sizeof(wordNode));
+    lht=wordDoctowordNode(ht1,"113",m,lht);
+    printWords(lht,m);
 
     fclose(fp);
     if (line)
