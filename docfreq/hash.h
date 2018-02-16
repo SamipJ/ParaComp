@@ -65,6 +65,10 @@ void printWords(wordNode* lht,int m);
 
 docNode addDoc(char* name,int freq,docNode head);
 
-// wordNode addWordNode(char* key,char* name,wordNode head);
+wordDoc* fill_ht(char* name,int m,wordDoc* ht,stopWord *sw);
 
-// docNode addDoc(char* name, docNode head);
+wordDoc* free_ht(wordDoc* ht,int m);
+
+stopWord* makeStopWords(char* fname, int m);
+
+int checkStopWord(char* key,int hash, stopWord* sw);
