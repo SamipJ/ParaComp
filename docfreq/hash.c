@@ -449,23 +449,23 @@ int checkStopWord(char* key,int hash, stopWord* sw){
 	}
 }
 
-int main(){
+// int main(){
     
-    int m= 5000;
-    // wordDoc* ht;
-    wordNode* lht=(wordNode*)malloc(m*sizeof(wordNode));
-	char* dirname =(char*)malloc(sizeof(char)*10);
-	char* procid =(char*)malloc(sizeof(char)*5);
-	char* pc=(char*)malloc(sizeof(char)*3);
-	int p=1;
-	sprintf(pc,"%d",p);
-	char* sqo =(char*)malloc(sizeof(char)*2);
-	strcpy(procid,strcat(strcat(strcpy(sqo,"["),pc),"]"));
-	strcpy(dirname,"files");
-	lht = fill_lht(m,lht,dirname,procid);
-    // printWords(lht,m);
-	// free_lht(lht,m);
-	// free(lht);			
-	return 0;
-}
+//     int m= 5000;
+//     // wordDoc* ht;
+//     wordNode* lht=(wordNode*)malloc(m*sizeof(wordNode));
+// 	char* dirname =(char*)malloc(sizeof(char)*10);
+// 	char* procid =(char*)malloc(sizeof(char)*5);
+// 	char* pc=(char*)malloc(sizeof(char)*3);
+// 	int p=1;
+// 	sprintf(pc,"%d",p);
+// 	char* sqo =(char*)malloc(sizeof(char)*2);
+// 	strcpy(procid,strcat(strcat(strcpy(sqo,"["),pc),"]"));
+// 	strcpy(dirname,"files");
+// 	lht = fill_lht(m,lht,dirname,procid);
+//     // printWords(lht,m);
+// 	// free_lht(lht,m);
+// 	// free(lht);			
+// 	return 0;
+// }
 	
