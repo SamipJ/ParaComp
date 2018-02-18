@@ -21,41 +21,42 @@ int main(int argc, char **argv)
 	free(procid);
 	free(pc);
 	free(sqo);
+	printWords(lht, m);
 	// MPI_Barrier(MPI_COMM_WORLD);
 	// wordNode* ght=(wordNode*)malloc(sizeof(wordNode)*((m/p)+1));
-	wordNode *ght;
-	char *wordarray;
-	char word[100];
-	if (rank == 0)
-	{
-		ght = (wordNode *)malloc(sizeof(wordNode) * m);
-		wordarray = (char *)malloc(sizeof(char) * (100 * p));
-		// totalstring = malloc(totlen * sizeof(char));
-		// for (int i=0; i<(100*p)-1; i++)
-		//     totalstring[i] = ' ';
-		// totalstring[totlen-1] = '\0';
-	}
-	int i;
-	wordNode temp;
-	for (i = (rank * 5); i < m; i++)
-	{
-		if (lht[i] != NULL)
-		{
-			temp = lht[i];
-			strcpy(word, temp->key);
-			printf("%s %d %d\n", word, rank, i);
-			MPI_Gather(word, 100, MPI_CHAR, wordarray, 100, MPI_CHAR, 0, MPI_COMM_WORLD);
-			break;
-		}
-	}
-	if (rank == 0)
-	{
-		printf("Hey\n");
-		for (i = 0; i < p; i++)
-		{
-			printf("%s %d\n", &wordarray[i * 100], &wordarray[i * 100]);
-		}
-	}
+	// wordNode *ght;
+	// char *wordarray;
+	// char word[100];
+	// if (rank == 0)
+	// {
+	// 	ght = (wordNode *)malloc(sizeof(wordNode) * m);
+	// 	wordarray = (char *)malloc(sizeof(char) * (100 * p));
+	// 	// totalstring = malloc(totlen * sizeof(char));
+	// 	// for (int i=0; i<(100*p)-1; i++)
+	// 	//     totalstring[i] = ' ';
+	// 	// totalstring[totlen-1] = '\0';
+	// }
+	// int i;
+	// wordNode temp;
+	// for (i = (rank * 5); i < m; i++)
+	// {
+	// 	if (lht[i] != NULL)
+	// 	{
+	// 		temp = lht[i];
+	// 		strcpy(word, temp->key);
+	// 		printf("%s %d %d\n", word, rank, i);
+	// 		MPI_Gather(word, 100, MPI_CHAR, wordarray, 100, MPI_CHAR, 0, MPI_COMM_WORLD);
+	// 		break;
+	// 	}
+	// }
+	// if (rank == 0)
+	// {
+	// 	printf("Hey\n");
+	// 	for (i = 0; i < p; i++)
+	// 	{
+	// 		printf("%s %d\n", &wordarray[i * 100], &wordarray[i * 100]);
+	// 	}
+	// }
 
 	// printWords(lht,m);
 	MPI_Finalize();
