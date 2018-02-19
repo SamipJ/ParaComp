@@ -45,6 +45,15 @@ typedef struct wordnode{
 
 typedef wordnode* wordNode;
 
+
+typedef struct msgnode
+{
+	char s[28];
+	int num;
+}msgnode;
+
+typedef msgnode* msgNode;
+
 int hash(char *str,int m);
 
 wordDoc newWordDoc(char* key);
