@@ -1,2 +1,2 @@
 compile: parallelseive.c
-	mpicc parallelseive.c -lm -o exe
+	mpicc -g parallelseive.c -lm -o exe

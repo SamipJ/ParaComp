@@ -11,8 +11,9 @@ int main(int argc, char** argv) {
     // Initialize the MPI environment
     MPI_Init(&argc, &argv);
 
-    int rank, p, i, j, k,primesize;
-    long int n;
+    int rank, p, k;
+    int primesize;
+    long int n, i, j;
     char* primebool;
     int* primertn;
 
@@ -27,12 +28,12 @@ int main(int argc, char** argv) {
     if(rank==0){
         printf("Enter Number:\n");
         scanf("%ld",&n);
-	    // printf("ECHO: %ld\n",n);
+	    printf("ECHO: %ld\n",n);
 
     }
     
     MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Bcast(&n,1,MPI_INT,0,MPI_COMM_WORLD);
+    MPI_Bcast(&n,1,MPI_LONG,0,MPI_COMM_WORLD);
 
     int rtn,rtrtn,count;
     count=0;
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
 
     // printf("Hello from rank %d NUMBER %d \n", rank, n);
     
-    int start,end;
+    long int start,end;
     start = (n/p)*rank +1;
     start=start-start%2+1;
     end = (n/p)*(rank+1);
@@ -57,7 +58,7 @@ int main(int argc, char** argv) {
         end=n;
     }
     // printf("%d %d %d\n",start,end,rank);
-    primebool = (char*)malloc(sizeof(char)* ((end-start)/2+1));
+    primebool = (char*)malloc(sizeof(char)* (int)((end-start)/2+1));
     
     for(i=start;i<=end;i+=2){
         j = i-start;
@@ -73,7 +74,7 @@ int main(int argc, char** argv) {
         for(i=3;i<=rtrtn;i+=2){
             if (primebool[i/2]=='1'){
                 // printf("%d, %d\n",rank, i );
-                MPI_Ibcast(&i,1,MPI_INT,0,MPI_COMM_WORLD,&req);
+                MPI_Ibcast(&i,1,MPI_LONG,0,MPI_COMM_WORLD,&req);
                 count++;
                 for(j=i*i;j<=rtn;j=j+2*i){
                     primebool[j/2]='0';
@@ -82,10 +83,10 @@ int main(int argc, char** argv) {
         }
         
         i=-1;
-        MPI_Ibcast(&i,1,MPI_INT,0,MPI_COMM_WORLD,&req);
+        MPI_Ibcast(&i,1,MPI_LONG,0,MPI_COMM_WORLD,&req);
     }
     else{
-        MPI_Ibcast(&i,1,MPI_INT,0,MPI_COMM_WORLD,&req);
+        MPI_Ibcast(&i,1,MPI_LONG,0,MPI_COMM_WORLD,&req);
         MPI_Wait(&req,MPI_STATUS_IGNORE);
         // printf("first%d, %d\n",rank, i );
         // start=start-start%2+1;
@@ -101,7 +102,7 @@ int main(int argc, char** argv) {
                 primebool[k/2]='0';
                 j+=2*i;
             }
-            MPI_Ibcast(&i,1,MPI_INT,0,MPI_COMM_WORLD,&req);
+            MPI_Ibcast(&i,1,MPI_LONG,0,MPI_COMM_WORLD,&req);
             MPI_Wait(&req,MPI_STATUS_IGNORE);
         }
         
@@ -109,7 +110,7 @@ int main(int argc, char** argv) {
 
     if(rank==0){
         primertn=(int*)malloc(count*sizeof(int));
-        int count1,size1;
+        int count1,size1,i1;
         size1=count;
         count1=0;
         for (i=3;i<=rtn;i+=2){
@@ -123,9 +124,9 @@ int main(int argc, char** argv) {
         primesize = count1;
         // prime1=(int*)realloc(prime1,count1*sizeof(int));
         }
-        i = count1-count;
-        MPI_Ibcast(&i,1,MPI_INT,0,MPI_COMM_WORLD,&req);
-        MPI_Ibcast(&primertn[count],i,MPI_INT,0,MPI_COMM_WORLD,&req);
+        i1 = count1-count;
+        MPI_Ibcast(&i1,1,MPI_INT,0,MPI_COMM_WORLD,&req);
+        MPI_Ibcast(&primertn[count],i1,MPI_INT,0,MPI_COMM_WORLD,&req);
     }else{
         MPI_Ibcast(&primesize,1,MPI_INT,0,MPI_COMM_WORLD,&req);
         MPI_Wait(&req,MPI_STATUS_IGNORE);
@@ -134,34 +135,34 @@ int main(int argc, char** argv) {
         MPI_Wait(&req,MPI_STATUS_IGNORE);
     }
 
-    int from=start;
+    int from=start,j1,k1,i1;
     if (rank==0) from=rtn+1;
-    for(i=0;i<primesize;i++){
-        k = primertn[i];
+    for(i1=0;i1<primesize;i1++){
+        k1 = primertn[i1];
         // printf("%d %d %d\n",k,rank,i);
-        j=from;
-        if (j%k!=0) j=(from+k-(from%k));
-        if (j%2==0) j=j+k;
-        if (j<k*k) j = k*k;
+        j1=from;
+        if (j1%k1!=0) j1=(from+k1-(from%k1));
+        if (j1%2==0) j1=j1+k1;
+        if (j1<k1*k1) j1= k1*k1;
         // printf("%d %d jprintj\n",j,k);
         // if (k==7) printf("Hey %d %d %d\n",j,rank,from);
-        for (j;j<=end;j+=2*k){
+        for (j1;j1<=end;j1+=2*k1){
             // if(j==77) printf("Hi");
-            primebool[(j-start)/2]='0';
+            primebool[(j1-start)/2]='0';
         }
     }
 
 
 
-    int* primenumbers = (int*)malloc(10*sizeof(int));
+    long int* primenumbers = (long int*)malloc(10*sizeof(long int));
     int totalprime = 10;
     count = 0;
-    for(i=start;i<=end;i+=2){
+    for(i1=start;i1<=end;i1+=2){
 
-        if(primebool[(i-start)/2]=='1'){
-            primenumbers[count++]=i;
+        if(primebool[(i1-start)/2]=='1'){
+            primenumbers[count++]=i1;
             if(count==totalprime){
-                primenumbers = (int*)realloc(primenumbers,totalprime*2*sizeof(int));
+                primenumbers = (long int*)realloc(primenumbers,totalprime*2*sizeof(long int));
                 totalprime=totalprime*2;
             }
         }
@@ -170,28 +171,32 @@ int main(int argc, char** argv) {
     // MPI_Barrier(MPI_COMM_WORLD);
 
     int finalcount;
-    int *finalprimes,*countarr=NULL;
+    long int *finalprimes;
+    int *countarr=NULL;
     if(rank==0){
         countarr=(int*)malloc(p*sizeof(int));
     }
+    printf("Hello World from %d\n",rank);
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Gather(&count, 1, MPI_INT,countarr,1, MPI_INT,0, MPI_COMM_WORLD);
     int *displs = NULL;
     if(rank==0){
         displs=(int*)malloc(p*sizeof(int));
         displs[0]=0;
-        i=1;
-        while(i<p){
-            finalcount+=countarr[i-1];
-            displs[i]=finalcount;
-            i++;
+        i1=1;
+        while(i1<p){
+            finalcount+=countarr[i1-1];
+            displs[i1]=finalcount;
+            i1++;
         }
-        finalcount+=countarr[i-1]+1;
-        finalprimes=(int*)malloc(finalcount*sizeof(int));
+        finalcount+=countarr[i1-1]+1;
+        finalprimes=(long int*)malloc(finalcount*sizeof(long int));
         finalprimes[0]=2;
 
     }
-    MPI_Gatherv(primenumbers, count, MPI_INT,&finalprimes[1], countarr, displs, MPI_INT,0, MPI_COMM_WORLD);
-
+    printf("Hello World from %d\n",rank);
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Gatherv(primenumbers, count, MPI_LONG,&finalprimes[1], countarr, displs, MPI_LONG,0, MPI_COMM_WORLD);
 
 	if (rank==0)  printf("Total %d\n",finalcount);
 

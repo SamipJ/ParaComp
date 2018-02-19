@@ -1,4 +1,5 @@
 exe
+output
 files/
 # Prerequisites
 *.d
