@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	free(pc);
 	free(sqo);
 
-	int i,count,j,k,size;
+	int i,count,j,k,size,sum,k1;
 	int *countarr;
     int *displs,*displs2;
     displs = (int*)calloc(p,sizeof(int));
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 	wordNode temp;
 	msgNode arr,temp1;
 	int* arr2=NULL;
-	msgNode recvarr=NULL;
+	msgNode recvarr=NULL,recvdocs=NULL;
 	/* create a type for struct car */
     const int nitems=2;
     int  blocklengths[2] = {28,1};
@@ -44,26 +44,21 @@ int main(int argc, char **argv)
     MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_msg_type);
     MPI_Type_commit(&mpi_msg_type);
 
-	// for(i=0;i<m;i+=p)
-	// {
-		i=0;
+	for(i=0;i<m;i+=p)
+	{
+		// i=0;
 		for (j = 0; j < p && (j+i)<m; j++)
 		{
 			/* code */
 			// j=0;
 			count=0;
-			// arr=NULL;
-			arr2=NULL;
+			arr=NULL;
 			temp=lht[i+j];
 			while(temp!=NULL){
 				count++;
 				arr=(msgNode)realloc(arr,sizeof(msgnode)*count);
-				arr2=(int*)realloc(arr2,sizeof(int)*count);
 				strcpy(arr[count-1].s,temp->key);
-				arr2[count-1]=temp->size;
-				// printf("%d %d %d\n",arr2[count-1],count,rank);
 				printf("%s  %d\n",arr[count-1].s,arr[count-1].num );
-
 				arr[count-1].num=temp->size;
 				temp=temp->next;
 			}
@@ -72,58 +67,42 @@ int main(int argc, char **argv)
 			
 			if(rank==j){
 				displs[0]=0;
-				// displs2[0]=0;
 				for(k=1;k<p;k++){
 					displs[k]=displs[k-1]+countarr[k-1];
-					// displs2[k]=displs2[k-1]+countarr[k-1];
 				}
 				size=displs[p-1]+countarr[p-1];
-				// size=displs2[p-1]+countarr[p-1];
-				// size=size/sizeof(msgnode);
 				recvarr=(msgNode)malloc(size*sizeof(msgnode));
-				// recvarr=(int*)malloc(size*sizeof(int));
-				// for (k=0;k<(size);k++){
-				// 	// printf("%d\n",recvarr[k]);
-				// 	recvarr[k]=;
-				// }
 				printf("size----%d\n",size);
 
 			}
-			// MPI_Gatherv(primenumbers, count, MPI_INT,&finalprimes[1], countarr, displs, MPI_INT,0, MPI_COMM_WORLD);
-
     		MPI_Gatherv(arr,count,mpi_msg_type,recvarr,countarr,displs,mpi_msg_type,j,MPI_COMM_WORLD);
-    		// for(k=0;k<count;k++){
-    		// 	printf("%d :%d\n",rank,arr2[k] );
-    		// }
-    		// MPI_Barrier(MPI_COMM_WORLD);
-    		// MPI_Gatherv(arr2,count,MPI_INT,recvarr,countarr,displs2,MPI_INT,j,MPI_COMM_WORLD);
-    	
+			free(arr);
+			
+			if(rank==j){
+				sum=0;
+				for(k=0;k<p;k++){
+					for(k1=0;k1<countarr[k];k1++){
+						sum+=recvarr[k1].num;
+					}
+				}
+				recvdocs=(msgNode)malloc(sum*sizeof(msgnode));
+			}
 		}
 		MPI_Barrier(MPI_COMM_WORLD);
-		// if(rank==0){
-		// 	for (k=0;k<(size);k++){
-		// 		printf("%d\n",recvarr[k]);
-		// 	}
-		// }
-		// printf("exited %d\n",rank);
-		// free(displs);
-		// free(countarr);
-		// if(rank==0)free(recvarr);
-		// free(arr2);
-		// if(rank==0){
-			int index=0;	
-			for(k=0;k<p;k++){
-				count=0;
-				while(count<countarr[k]){
-					temp1=&recvarr[index];
-					printf("%s %d index %d count%d rank%d\n", temp1->s,temp1->num,index,count,rank);
-					count++;
-					index++;
-				}
-			}
+		
+			// int index=0;	
+			// for(k=0;k<p;k++){
+			// 	count=0;
+			// 	while(count<countarr[k]){
+			// 		temp1=&recvarr[index];
+			// 		printf("%s %d index %d count%d rank%d\n", temp1->s,temp1->num,index,count,rank);
+			// 		count++;
+			// 		index++;
+			// 	}
 			// }
+			
 
-	// }
+	}
 	// printWords(lht, m);
 	// MPI_Barrier(MPI_COMM_WORLD);
 	// wordNode* ght=(wordNode*)malloc(sizeof(wordNode)*((m/p)+1));
