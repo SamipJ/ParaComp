@@ -11,9 +11,9 @@ int main(int argc, char** argv) {
     // Initialize the MPI environment
     MPI_Init(&argc, &argv);
 
-    int rank, p, k;
+    int rank, p;
     int primesize;
-    long int n, i, j;
+    long int n, i, j,k;
     char* primebool;
     int* primertn;
 
@@ -28,8 +28,8 @@ int main(int argc, char** argv) {
     if(rank==0){
         printf("Enter Number:\n");
         scanf("%ld",&n);
-	    printf("ECHO: %ld\n",n);
-
+	    // printf("ECHO: %ld\n",n);
+        // n=1000000000;
     }
     
     MPI_Barrier(MPI_COMM_WORLD);
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
         MPI_Wait(&req,MPI_STATUS_IGNORE);
     }
 
-    int from=start,j1,k1,i1;
+    long int from=start,j1,k1,i1;
     if (rank==0) from=rtn+1;
     for(i1=0;i1<primesize;i1++){
         k1 = primertn[i1];
@@ -170,13 +170,13 @@ int main(int argc, char** argv) {
 
     // MPI_Barrier(MPI_COMM_WORLD);
 
-    int finalcount;
+    int finalcount=0;
     long int *finalprimes;
     int *countarr=NULL;
     if(rank==0){
         countarr=(int*)malloc(p*sizeof(int));
     }
-    printf("Hello World from %d\n",rank);
+    // printf("Hello World from %d\n",rank);
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Gather(&count, 1, MPI_INT,countarr,1, MPI_INT,0, MPI_COMM_WORLD);
     int *displs = NULL;
@@ -194,21 +194,25 @@ int main(int argc, char** argv) {
         finalprimes[0]=2;
 
     }
-    printf("Hello World from %d\n",rank);
+    // printf("Hello World from %d\n",rank);
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Gatherv(primenumbers, count, MPI_LONG,&finalprimes[1], countarr, displs, MPI_LONG,0, MPI_COMM_WORLD);
 
 	if (rank==0)  printf("Total %d\n",finalcount);
 
+   // FILE * fp;
+   // fp = fopen ("output", "w+");
 
-    // if(rank==0){
-    //     i=0;
-    //     while(i<finalcount){
-    //         printf("%d\n",finalprimes[i] );
-    //         i++;
+   //  if(rank==0){
+   //      i=0;
+   //      while(i<finalcount){
+   //          fprintf(fp,"%ld\n",finalprimes[i] );
+   //          i++;
+   //      }
+   //  }
 
-    //     }
-    // }
+
+   // fclose(fp);
     // MPI_Ibcast(&n,1,MPI_INT,0,MPI_COMM_WORLD,&req);
     // MPI_Wait(&req,MPI_STATUS_IGNORE);
 
