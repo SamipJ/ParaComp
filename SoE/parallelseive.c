@@ -9,8 +9,10 @@
 
 int main(int argc, char** argv) {
     // Initialize the MPI environment
+    double t1,t2;
     MPI_Init(&argc, &argv);
-
+    t1 = MPI_Wtime();
+    
     int rank, p;
     int primesize;
     long int n, i, j,k;
@@ -28,7 +30,7 @@ int main(int argc, char** argv) {
     if(rank==0){
         printf("Enter Number:\n");
         scanf("%ld",&n);
-	    // printf("ECHO: %ld\n",n);
+        // printf("ECHO: %ld\n",n);
         // n=1000000000;
     }
     
@@ -41,10 +43,10 @@ int main(int argc, char** argv) {
     rtrtn=sqrt(rtn);
 
     if (n/p < rtn){
-    	if(rank==0)
-    	printf("You have either entered very small number or more processes than required which is making our parallel code worse than sequential. Please enter number at least square of no. of processes entered. \nThank You for your time.\n");
-    	MPI_Finalize();
-    	exit(0);
+        if(rank==0)
+        printf("You have either entered very small number or more processes than required which is making our parallel code worse than sequential. Please enter number at least square of no. of processes entered. \nThank You for your time.\n");
+        MPI_Finalize();
+        exit(0);
     }
     
 
@@ -198,7 +200,7 @@ int main(int argc, char** argv) {
     MPI_Barrier(MPI_COMM_WORLD);
     MPI_Gatherv(primenumbers, count, MPI_LONG,&finalprimes[1], countarr, displs, MPI_LONG,0, MPI_COMM_WORLD);
 
-	if (rank==0)  printf("Total %d\n",finalcount);
+    if (rank==0)  printf("Total %d\n",finalcount);
 
    FILE * fp;
    fp = fopen ("output", "w+");
@@ -217,6 +219,8 @@ int main(int argc, char** argv) {
     // MPI_Wait(&req,MPI_STATUS_IGNORE);
 
     // Finalize the MPI environment.
+    t2 = MPI_Wtime();
+    printf("MPI_Wtime measured by process %d: %1.2f\n",rank, t2-t1);fflush(stdout);
     MPI_Finalize();
     // printf("End\n");
 }
