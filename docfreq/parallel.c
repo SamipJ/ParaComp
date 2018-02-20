@@ -9,24 +9,35 @@ int main(int argc, char **argv)
 	MPI_Comm_size(MPI_COMM_WORLD, &p);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	m = 5000;
-	wordNode *lht = (wordNode *)malloc(m * sizeof(wordNode));
+	// m = 10;
+	wordNode *lht = (wordNode *)calloc(m,sizeof(wordNode));
 	dirname = (char *)malloc(sizeof(char) * 10);
 	procid = (char *)malloc(sizeof(char) * 5);
 	pc = (char *)malloc(sizeof(char) * 3);
 	sprintf(pc, "%d", rank);
 	sqo = (char *)malloc(sizeof(char) * 2);
+	char *files=(char*)calloc(32,sizeof(char));
+	// strcpy(files,"files/");
+	// printf("%s\n",files);
 	strcpy(procid, strcat(strcat(strcpy(sqo, "["), pc), "]"));
 	strcpy(dirname, "files");
+	// files=strcat(files,pc);
+	// printf("%s\n",files);
+	// strcpy(dirname,files);
+	printf("%s\n",dirname);
 	lht = fill_lht(m, lht, dirname, procid);
+	// printWords(lht,m);
 	free(procid);
 	free(pc);
 	free(sqo);
+	free(dirname);
+	free(files);
 
 	int i, count, j, k, size, sum, sum1, sum2, k1, x, y, z, indexdoc, indexword;
 	int *countarr = NULL, *countarr2 = NULL;
 	int *displs = NULL, *displs2 = NULL;
-	docNode temp2, headDoc,prevDoc,tempDoc;	
-	wordNode temp, headWord,prev;
+	docNode temp2, headDoc,prevDoc,tempDoc,freeDoc;	
+	wordNode temp, headWord,prev,freeWord;
 	msgNode arr, temp1, sendDocData=NULL;
 	int *arr2 = NULL;
 	msgNode recvarr = NULL, recvdocs = NULL;
@@ -59,6 +70,7 @@ int main(int argc, char **argv)
 				count++;
 				arr = (msgNode)realloc(arr, sizeof(msgnode) * count);
 				strcpy(arr[count - 1].s, temp->key);
+				free(temp->key);
 				// printf("%s  %d\n",arr[count-1].s,arr[count-1].num );
 				arr[count - 1].num = temp->size;
 				sum += temp->size;
@@ -68,10 +80,14 @@ int main(int argc, char **argv)
 				{
 					strcpy(sendDocData[k].s, temp2->name);
 					sendDocData[k].num = temp2->freq;
+					freeDoc=temp2;
 					temp2 = temp2->next;
+					free(freeDoc);
 					k++;
 				}
+				freeWord=temp;
 				temp = temp->next;
+				free(freeWord);
 				
 			}
 			if(rank==j){
@@ -126,7 +142,6 @@ int main(int argc, char **argv)
 				free(displs2);
 				indexword = 0;
 				indexdoc = 0;
-				free(temp);
 				temp = NULL;
 				prev = NULL;
 				headWord = NULL;
@@ -146,6 +161,7 @@ int main(int argc, char **argv)
 							temp->key=(char*)malloc(sizeof(char)*(strlen(recvarr[indexword].s)+1));
 							strcpy(temp->key, recvarr[indexword].s);
 							temp->size = recvarr[indexword].num;
+							// printf("1>>>>>>%s %d\n",temp->key,temp->size);
 							temp->next = NULL;
 							temp->docLink = (docNode)malloc(sizeof(docnode));
 							tempDoc = temp->docLink;
@@ -154,6 +170,7 @@ int main(int argc, char **argv)
 								tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
 								strcpy(tempDoc->name, recvdocs[indexdoc].s);
 								tempDoc->freq = recvdocs[indexdoc].num;
+								// printf("-1<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
 								prevDoc = tempDoc;
 								tempDoc->next = (docNode)malloc(sizeof(docnode));
 								tempDoc = tempDoc->next;
@@ -161,8 +178,8 @@ int main(int argc, char **argv)
 							}
 							tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
 							strcpy(tempDoc->name, recvdocs[indexdoc].s);
-							tempDoc->name=recvdocs[indexdoc].s;
 							tempDoc->freq = recvdocs[indexdoc].num;
+							// printf("0<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
 							indexdoc++;
 							tempDoc->next=NULL;
 						}
@@ -179,6 +196,7 @@ int main(int argc, char **argv)
 								strcpy(temp->key, recvarr[indexword].s);
 								// tempDoc->name=recvdocs[indexdoc].s;
 								temp->size = recvarr[indexword].num;
+								// printf("2>>>>>>%s %d\n",temp->key,temp->size);
 								temp->next = NULL;
 								temp->docLink = (docNode)malloc(sizeof(docnode));
 								tempDoc = temp->docLink;
@@ -187,6 +205,7 @@ int main(int argc, char **argv)
 									tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
 									strcpy(tempDoc->name, recvdocs[indexdoc].s);
 									tempDoc->freq = recvdocs[indexdoc].num;
+									// printf("1<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
 									prevDoc = tempDoc;
 									tempDoc->next = (docNode)malloc(sizeof(docnode));
 									tempDoc = tempDoc->next;
@@ -195,14 +214,57 @@ int main(int argc, char **argv)
 								tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
 								strcpy(tempDoc->name, recvdocs[indexdoc].s);
 								tempDoc->freq = recvdocs[indexdoc].num;
+								// printf("2<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
 								indexdoc++;
 								tempDoc->next=NULL;
 							}
 							else if(strcmp(recvarr[indexword].s,temp->key)==0)
 							{
+								// printf("3>>>>>>%s %d\n",temp->key,temp->size);
 								temp->size+=recvarr[indexword].num;
 								tempDoc=temp->docLink;
-
+								prevDoc=NULL;
+								for(z=0;z<(recvarr[indexword].num);z++){
+									// printf("z:%d\n",z);
+									if ((recvdocs[indexdoc].num == temp->docLink->freq && z==0)||recvdocs[indexdoc].num > temp->docLink->freq){
+										prevDoc = (docNode)malloc(sizeof(docnode));
+										prevDoc->freq=recvdocs[indexdoc].num;
+										prevDoc->name=(char*)malloc(sizeof(char)*(strlen(recvdocs[indexdoc].s)+1));
+										strcpy(prevDoc->name,recvdocs[indexdoc].s);
+										// printf("3<<<<<%s %d\n",prevDoc->name,prevDoc->freq);
+										prevDoc->next=tempDoc;
+										temp->docLink = prevDoc;
+										// tempDoc = temp->docLink;
+									}else{
+										while(tempDoc->next!=NULL&& tempDoc->freq > recvdocs[indexdoc].num){
+											prevDoc=tempDoc;
+											tempDoc=tempDoc->next;
+										}
+										if(tempDoc->freq > recvdocs[indexdoc].num){
+											while(z<(recvarr[indexword].num)){
+											tempDoc->next = (docNode)malloc(sizeof(docnode));
+											tempDoc=tempDoc->next;
+											tempDoc->freq = recvdocs[indexdoc].num;
+											tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvdocs[indexdoc].s)+1));
+											strcpy(tempDoc->name,recvdocs[indexdoc].s);
+											// printf("4<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
+											prevDoc = tempDoc;
+											tempDoc->next=NULL;
+											z++;
+											indexdoc++;}
+											break;
+										}else{
+											prevDoc->next = (docNode)malloc(sizeof(docnode));
+											prevDoc=prevDoc->next;
+											prevDoc->freq = recvdocs[indexdoc].num;
+											prevDoc->name=(char*)malloc(sizeof(char)*(strlen(recvdocs[indexdoc].s)+1));
+											strcpy(prevDoc->name,recvdocs[indexdoc].s);
+											// printf("5<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
+											prevDoc->next = tempDoc;
+										}
+									}
+									indexdoc++;
+								}
 
 
 							}
@@ -211,9 +273,10 @@ int main(int argc, char **argv)
 								if(strcmp(temp->key,headWord->key)==0){
 									prev=(wordNode)malloc(sizeof(wordnode));
 									prev->next=temp;
-									temp->key=(char*)malloc(sizeof(char)*(strlen(recvarr[indexword].s)+1));
-									strcpy(temp->key, recvarr[indexword].s);
+									prev->key=(char*)malloc(sizeof(char)*(strlen(recvarr[indexword].s)+1));
+									strcpy(prev->key, recvarr[indexword].s);
 									prev->size = recvarr[indexword].num;
+									// printf("4>>>>>>%s %d\n",temp->key,temp->size);
 									prev->next = NULL;
 									prev->docLink = (docNode)malloc(sizeof(docnode));
 									tempDoc = temp->docLink;
@@ -222,6 +285,7 @@ int main(int argc, char **argv)
 										tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
 										strcpy(tempDoc->name, recvdocs[indexdoc].s);
 										tempDoc->freq = recvdocs[indexdoc].num;
+										// printf("6<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
 										prevDoc = tempDoc;
 										tempDoc->next = (docNode)malloc(sizeof(docnode));
 										tempDoc = tempDoc->next;
@@ -230,6 +294,7 @@ int main(int argc, char **argv)
 									tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
 									strcpy(tempDoc->name, recvdocs[indexdoc].s);
 									tempDoc->freq = recvdocs[indexdoc].num;
+									// printf("7<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
 									indexdoc++;
 									tempDoc->next=NULL;
 									headWord=prev;
@@ -241,6 +306,7 @@ int main(int argc, char **argv)
 									temp->key=(char*)malloc(sizeof(char)*(strlen(recvarr[indexword].s)+1));
 									strcpy(temp->key, recvarr[indexword].s);
 									prev->size = recvarr[indexword].num;
+									// printf("5>>>>>>%s %d\n",temp->key,temp->size);
 									prev->next = NULL;
 									prev->docLink = (docNode)malloc(sizeof(docnode));
 									tempDoc = temp->docLink;
@@ -249,6 +315,7 @@ int main(int argc, char **argv)
 										tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
 										strcpy(tempDoc->name, recvdocs[indexdoc].s);
 										tempDoc->freq = recvdocs[indexdoc].num;
+										// printf("8<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
 										prevDoc = tempDoc;
 										tempDoc->next = (docNode)malloc(sizeof(docnode));
 										tempDoc = tempDoc->next;
@@ -257,6 +324,7 @@ int main(int argc, char **argv)
 									tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
 									strcpy(tempDoc->name, recvdocs[indexdoc].s);
 									tempDoc->freq = recvdocs[indexdoc].num;
+									// printf("9<<<<<%s %d\n",tempDoc->name,tempDoc->freq);
 									indexdoc++;
 									tempDoc->next=NULL;
 								}
@@ -270,9 +338,27 @@ int main(int argc, char **argv)
 				free(displs);
 				free(recvdocs);
 				free(recvarr);
+
+				
+
+			}
+			
+		}
+		for(x=0;x<p;x++){
+			MPI_Barrier(MPI_COMM_WORLD);
+			if (rank!=x) continue;
+			temp = headWord;
+			while(temp!=NULL){
+				tempDoc = temp->docLink;
+				printf("%s word %d\n",temp->key,temp->size);
+				while(tempDoc!=NULL){
+					printf("\t%s doc %d\n",tempDoc->name,tempDoc->freq);
+					tempDoc=tempDoc->next;
+				}
+				temp=temp->next;
 			}
 		}
-		
+		// printf("----------------%d\n",i+j);
 	}
 	// MPI_Barrier(MPI_COMM_WORLD);
 

@@ -413,7 +413,7 @@ stopWord* makeStopWords(char* fname, int m){
 	int j,k;
 	while ((read = getline(&line, &len, fp)) != -1) {
 		for (j = 1, str1 = line; ; j++, str1 = NULL) {
-			token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
+			token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}”!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
 			if (token == NULL)
 				break;
 			for ( p=token; *p; ++p) *p = tolower(*p);
