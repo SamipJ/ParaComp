@@ -456,23 +456,59 @@ int checkStopWord(char* key,int hash, stopWord* sw){
 	}
 }
 
-// int main(){
-    
-//     int m= 5000;
-//     // wordDoc* ht;
-//     wordNode* lht=(wordNode*)malloc(m*sizeof(wordNode));
-// 	char* dirname =(char*)malloc(sizeof(char)*10);
-// 	char* procid =(char*)malloc(sizeof(char)*5);
-// 	char* pc=(char*)malloc(sizeof(char)*3);
-// 	int p=1;
-// 	sprintf(pc,"%d",p);
-// 	char* sqo =(char*)malloc(sizeof(char)*2);
-// 	strcpy(procid,strcat(strcat(strcpy(sqo,"["),pc),"]"));
-// 	strcpy(dirname,"files");
-// 	lht = fill_lht(m,lht,dirname,procid);
-//     // printWords(lht,m);
-// 	// free_lht(lht,m);
-// 	// free(lht);			
-// 	return 0;
-// }
+char* stringify(wordNode headWord,int ind,int rank){
+	wordNode temp,prev;
+	docNode tempDoc,prevDoc;
+	int d=ind+rank;
+
+	char* string=NULL,*num=NULL;
+	int i=0;
+	if(headWord==NULL) return string;
+	num=(char*)malloc(6*sizeof(char));
+	sprintf(num,"%d",d);
+	i+=17;
+	string=(char*)realloc(string,i*sizeof(char));
+	strcpy(string,"{\n");
+	strcat(string,num);
+	strcat(string,"   :{\n");
+	temp=headWord;
+	while(temp!=NULL){
+		i+=strlen(temp->key);
+		i+=8;
+		tempDoc=temp->docLink;
+		string=(char*)realloc(string,i*sizeof(char));
+		strcat(string,"\t");
+		strcat(string,temp->key);
+		free(temp->key);
+		strcat(string,":{\n");
+		while(tempDoc!=NULL){
+			i+=(12+strlen(tempDoc->name));
+			sprintf(num,"%d",tempDoc->freq);
+			string=(char*)realloc(string,i*sizeof(char));
+			strcat(string,"\t\t");
+			strcat(string,tempDoc->name);
+			strcat(string," ");
+			strcat(string,num);
+			strcat(string,",\n");
+			// free(num);
+			free(tempDoc->name);
+			tempDoc=tempDoc->next;
+		}
+		strcat(string,"\t},\n");
+		temp=temp->next;
+	}
+	strcat(string,"    },\n");
+	strcat(string,"},\n");
+	// temp = headWord;
+	// while(temp!=NULL){
+	// 	tempDoc = temp->docLink;
+	// 	printf("%s word %d\n",temp->key,temp->size);
+	// 	while(tempDoc!=NULL){
+	// 		printf("\t%s doc %d\n",tempDoc->name,tempDoc->freq);
+	// 		tempDoc=tempDoc->next;
+	// 	}
+	// 	temp=temp->next;
+	// }
+	return string;
+}
 	

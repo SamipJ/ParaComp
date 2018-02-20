@@ -32,13 +32,13 @@ int main(int argc, char **argv)
 	free(sqo);
 	free(dirname);
 	free(files);
-
+	MPI_Request req,req1,req2,req3	;
 	int i, count, j, k, size, sum, sum1, sum2, k1, x, y, z, indexdoc, indexword;
 	int *countarr = NULL, *countarr2 = NULL;
 	int *displs = NULL, *displs2 = NULL;
 	docNode temp2, headDoc,prevDoc,tempDoc,freeDoc;	
 	wordNode temp, headWord,prev,freeWord;
-	msgNode arr, temp1, sendDocData=NULL;
+	msgNode arr=NULL, temp1, sendDocData=NULL;
 	int *arr2 = NULL;
 	msgNode recvarr = NULL, recvdocs = NULL;
 	/* create a type for struct car */
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 			{
 				// for (k = 0; k < sum1; k++)
 				// {
-				// 	printf("----%s %d\n", recvdocs[k].s, recvdocs[k].num);
+				// 	printf("%d----%s %d\n",j, recvdocs[k].s, recvdocs[k].num);
 				// }
 				free(countarr2);
 				free(displs2);
@@ -343,9 +343,73 @@ int main(int argc, char **argv)
 				free(displs);
 				free(recvdocs);
 				free(recvarr);
-
+				if(rank!=0){	
+					arr=NULL;
+					temp=headWord;
+					sum = 0;
+					count = 0;
+					sendDocData=NULL;
+					while(temp!=NULL){
+						count++;
+						sum+=temp->size;
+						temp=temp->next;
+					}
+					printf("%d %d\n",sum,count );
+					temp=headWord;
+					arr = (msgNode)malloc(sizeof(msgnode) * count);
+					sendDocData= (msgNode)malloc( sum * sizeof(msgnode));
+					count=0;
+					k=0;
+					while(temp!=NULL){
+						count++;
+						strcpy(arr[count - 1].s, temp->key);
+						free(temp->key);
+						arr[count - 1].num = temp->size;
+						temp2 = temp->docLink;
+						while (temp2 != NULL)
+						{
+							strcpy(sendDocData[k].s, temp2->name);
+							sendDocData[k].num = temp2->freq;
+							freeDoc=temp2;
+							temp2 = temp2->next;
+							free(freeDoc);
+							k++;
+						}
+						freeWord=temp;
+						temp = temp->next;
+						free(freeWord);
+					}
+					MPI_Isend(&count,1,MPI_INT,0,123,MPI_COMM_WORLD,&req);
+					MPI_Wait(&req,MPI_STATUS_IGNORE);
+					MPI_Isend(arr, count, mpi_msg_type,0, 123,MPI_COMM_WORLD, &req1);
+					MPI_Wait(&req1,MPI_STATUS_IGNORE);
+					// MPI_Wait(&req,MPI_STATUS_IGNORE);
+					// MPI_Isend(&sum,1,MPI_INT,0,123,MPI_COMM_WORLD,&req2);
+					// MPI_Wait(&req2,MPI_STATUS_IGNORE);
+					MPI_Isend(sendDocData,sum,mpi_msg_type,0,123,MPI_COMM_WORLD,&req3);
+					MPI_Wait(&req3,MPI_STATUS_IGNORE);
+					if(arr!=NULL){
+						free(arr);
+					}
+					if(sendDocData){
+						free(sendDocData);
+					}
+				}
 				
-
+			}
+			if(rank==0 && j!=0){
+				MPI_Irecv(&count,1,MPI_INT,j,123,MPI_COMM_WORLD,&req);
+				MPI_Wait(&req,MPI_STATUS_IGNORE);
+				arr=(msgNode)malloc(count*sizeof(msgnode));
+				MPI_Irecv(arr,count,mpi_msg_type,j,123,MPI_COMM_WORLD,&req);
+				MPI_Wait(&req,MPI_STATUS_IGNORE);
+				MPI_Irecv(&sum,1,MPI_INT,j,123,MPI_COMM_WORLD,&req);
+				MPI_Wait(&req,MPI_STATUS_IGNORE);
+				recvdocs=(msgNode)malloc(sum*sizeof(msgnode));
+				MPI_Irecv(recvdocs,sum,MPI_INT,j,123,MPI_COMM_WORLD,&req);
+				MPI_Wait(&req,MPI_STATUS_IGNORE);
+				free(recvdocs);
+				free(arr);
 			}
 			
 		}
