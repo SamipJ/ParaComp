@@ -1,6 +1,9 @@
 run : compile
 	mpirun -np 4 exe
 
+clean:
+	rm exe output
+
 gdb : compile
 	mpirun -np 4 xterm -e gdb exe
 

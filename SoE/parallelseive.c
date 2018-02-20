@@ -200,16 +200,16 @@ int main(int argc, char** argv) {
 
 	if (rank==0)  printf("Total %d\n",finalcount);
 
-   // FILE * fp;
-   // fp = fopen ("output", "w+");
+   FILE * fp;
+   fp = fopen ("output", "w+");
 
-   //  if(rank==0){
-   //      i=0;
-   //      while(i<finalcount){
-   //          fprintf(fp,"%ld\n",finalprimes[i] );
-   //          i++;
-   //      }
-   //  }
+    if(rank==0){
+        i=0;
+        while(i<finalcount){
+            fprintf(fp,"%ld\n",finalprimes[i] );
+            i++;
+        }
+    }
 
 
    // fclose(fp);
