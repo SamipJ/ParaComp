@@ -25,12 +25,9 @@ int main(int argc, char **argv)
 	int i, count, j, k, size, sum, sum1, sum2, k1, x, y, z, indexdoc, indexword;
 	int *countarr = NULL, *countarr2 = NULL;
 	int *displs = NULL, *displs2 = NULL;
-	displs = (int *)calloc(p, sizeof(int));
-
-	countarr = (int *)calloc(p, sizeof(int));
-	wordNode temp, headWord;
-	docNode temp2, headDoc;
-	msgNode arr, temp1, sendDocData;
+	docNode temp2, headDoc,prevDoc,tempDoc;	
+	wordNode temp, headWord,prev;
+	msgNode arr, temp1, sendDocData=NULL;
 	int *arr2 = NULL;
 	msgNode recvarr = NULL, recvdocs = NULL;
 	/* create a type for struct car */
@@ -39,7 +36,6 @@ int main(int argc, char **argv)
 	MPI_Datatype types[2] = {MPI_CHAR, MPI_INT};
 	MPI_Datatype mpi_msg_type;
 	MPI_Aint offsets[2];
-
 	offsets[0] = offsetof(msgnode, s);
 	offsets[1] = offsetof(msgnode, num);
 	MPI_Type_create_struct(nitems, blocklengths, offsets, types, &mpi_msg_type);
@@ -57,6 +53,7 @@ int main(int argc, char **argv)
 			temp = lht[i + j];
 			sum = 0;
 			k = 0;
+			sendDocData=NULL;
 			while (temp != NULL)
 			{
 				count++;
@@ -75,6 +72,11 @@ int main(int argc, char **argv)
 					k++;
 				}
 				temp = temp->next;
+				
+			}
+			if(rank==j){
+				displs = (int *)calloc(p, sizeof(int));
+				countarr = (int *)calloc(p, sizeof(int));
 			}
 
 			// printf("%d  %d\n",count,rank );
@@ -113,60 +115,168 @@ int main(int argc, char **argv)
 			}
 
 			MPI_Gatherv(sendDocData, sum, mpi_msg_type, recvdocs, countarr2, displs2, mpi_msg_type, j, MPI_COMM_WORLD);
+			free(sendDocData);
 			if (rank == j)
 			{
-				for (k = 0; k < sum1; k++)
-				{
-					printf("----%s %d\n", recvdocs[k].s, recvdocs[k].num);
-				}
+				// for (k = 0; k < sum1; k++)
+				// {
+				// 	printf("----%s %d\n", recvdocs[k].s, recvdocs[k].num);
+				// }
 				free(countarr2);
 				free(displs2);
-			}
-		}
-		indexword = 0;
-		indexdoc = 0;
-
-		temp = NULL;
-		prev = NULL;
-		headWord = NULL;
-		tempDoc = NULL;
-		prevDoc = NULL;
-		// headDoc = NULL;
-		for (x = 0; x < p; x++)
-		{
-			temp = headWord;
-			for (y = 0; y < countarr[x]; y++)
-			{
-				if (headWord == NULL)
+				indexword = 0;
+				indexdoc = 0;
+				free(temp);
+				temp = NULL;
+				prev = NULL;
+				headWord = NULL;
+				tempDoc = NULL;
+				prevDoc = NULL;
+				headDoc = NULL;
+				for (x = 0; x < p; x++)
 				{
-					headWord = (wordNode)malloc(sizeof(wordnode));
 					temp = headWord;
-					strcpy(temp->key, recvarr[indexword].s);
-					temp->size = recvarr[indexword].num;
-					temp->next = NULL;
-					temp->docLink = NULL;
-
-					temp->docLink = (docNode)malloc(sizeof(docnode));
-					tempDoc = temp->docLink;
-					for (z = 0; z < temp->size - 1; z++)
+					// prev=NULL;	
+					for (y = 0; y < countarr[x]; y++)
 					{
-						strcpy(tempDoc->key, recvdocs[indexdoc].s);
-						tempDoc->freq = recvdocs[indexdoc].num;
-						prevDoc = tempDoc;
-						tempDoc = tempDoc->next;
-						tempDoc = (docNode)malloc(sizeof(docnode));
+						if (headWord == NULL)
+						{
+							headWord = (wordNode)malloc(sizeof(wordnode));
+							temp = headWord;
+							temp->key=(char*)malloc(sizeof(char)*(strlen(recvarr[indexword].s)+1));
+							strcpy(temp->key, recvarr[indexword].s);
+							temp->size = recvarr[indexword].num;
+							temp->next = NULL;
+							temp->docLink = (docNode)malloc(sizeof(docnode));
+							tempDoc = temp->docLink;
+							for (z = 0; z < temp->size - 1; z++)
+							{
+								tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
+								strcpy(tempDoc->name, recvdocs[indexdoc].s);
+								tempDoc->freq = recvdocs[indexdoc].num;
+								prevDoc = tempDoc;
+								tempDoc->next = (docNode)malloc(sizeof(docnode));
+								tempDoc = tempDoc->next;
+								indexdoc++;
+							}
+							tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
+							strcpy(tempDoc->name, recvdocs[indexdoc].s);
+							tempDoc->name=recvdocs[indexdoc].s;
+							tempDoc->freq = recvdocs[indexdoc].num;
+							indexdoc++;
+							tempDoc->next=NULL;
+						}
+						else
+						{
+							while(temp->next!=NULL && strcmp(recvarr[indexword].s,temp->key)>0){
+								prev=temp;
+								temp=temp->next;
+							}
+							if(strcmp(recvarr[indexword].s,temp->key)>0){
+								temp->next=(wordNode)malloc(sizeof(wordnode));
+								temp=temp->next;
+								temp->key=(char*)malloc(sizeof(char)*(strlen(recvarr[indexword].s)+1));
+								strcpy(temp->key, recvarr[indexword].s);
+								// tempDoc->name=recvdocs[indexdoc].s;
+								temp->size = recvarr[indexword].num;
+								temp->next = NULL;
+								temp->docLink = (docNode)malloc(sizeof(docnode));
+								tempDoc = temp->docLink;
+								for (z = 0; z < temp->size - 1; z++)
+								{
+									tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
+									strcpy(tempDoc->name, recvdocs[indexdoc].s);
+									tempDoc->freq = recvdocs[indexdoc].num;
+									prevDoc = tempDoc;
+									tempDoc->next = (docNode)malloc(sizeof(docnode));
+									tempDoc = tempDoc->next;
+									indexdoc++;
+								}
+								tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
+								strcpy(tempDoc->name, recvdocs[indexdoc].s);
+								tempDoc->freq = recvdocs[indexdoc].num;
+								indexdoc++;
+								tempDoc->next=NULL;
+							}
+							else if(strcmp(recvarr[indexword].s,temp->key)==0)
+							{
+								temp->size+=recvarr[indexword].num;
+								tempDoc=temp->docLink;
+
+
+
+							}
+							else if(strcmp(recvarr[indexword].s,temp->key)<0)
+							{
+								if(strcmp(temp->key,headWord->key)==0){
+									prev=(wordNode)malloc(sizeof(wordnode));
+									prev->next=temp;
+									temp->key=(char*)malloc(sizeof(char)*(strlen(recvarr[indexword].s)+1));
+									strcpy(temp->key, recvarr[indexword].s);
+									prev->size = recvarr[indexword].num;
+									prev->next = NULL;
+									prev->docLink = (docNode)malloc(sizeof(docnode));
+									tempDoc = temp->docLink;
+									for (z = 0; z < temp->size - 1; z++)
+									{
+										tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
+										strcpy(tempDoc->name, recvdocs[indexdoc].s);
+										tempDoc->freq = recvdocs[indexdoc].num;
+										prevDoc = tempDoc;
+										tempDoc->next = (docNode)malloc(sizeof(docnode));
+										tempDoc = tempDoc->next;
+										indexdoc++;
+									}
+									tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
+									strcpy(tempDoc->name, recvdocs[indexdoc].s);
+									tempDoc->freq = recvdocs[indexdoc].num;
+									indexdoc++;
+									tempDoc->next=NULL;
+									headWord=prev;
+								}
+								else{
+									prev->next=(wordNode)malloc(sizeof(wordnode));
+									prev=prev->next;
+									prev->next=temp;
+									temp->key=(char*)malloc(sizeof(char)*(strlen(recvarr[indexword].s)+1));
+									strcpy(temp->key, recvarr[indexword].s);
+									prev->size = recvarr[indexword].num;
+									prev->next = NULL;
+									prev->docLink = (docNode)malloc(sizeof(docnode));
+									tempDoc = temp->docLink;
+									for (z = 0; z < temp->size - 1; z++)
+									{
+										tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
+										strcpy(tempDoc->name, recvdocs[indexdoc].s);
+										tempDoc->freq = recvdocs[indexdoc].num;
+										prevDoc = tempDoc;
+										tempDoc->next = (docNode)malloc(sizeof(docnode));
+										tempDoc = tempDoc->next;
+										indexdoc++;
+									}
+									tempDoc->name=(char*)malloc(sizeof(char)*(strlen(recvarr[indexdoc].s)+1));
+									strcpy(tempDoc->name, recvdocs[indexdoc].s);
+									tempDoc->freq = recvdocs[indexdoc].num;
+									indexdoc++;
+									tempDoc->next=NULL;
+								}
+
+							}
+						}
+						indexword++;
 					}
-					strcpy(tempDoc->key, recvdocs[indexdoc].s);
-					tempDoc->freq = recvdocs[indexdoc].num;
 				}
-				indexdoc += recvarr[indexword].num;
+				free(countarr);
+				free(displs);
+				free(recvdocs);
+				free(recvarr);
 			}
-			indexword++;
 		}
+		
 	}
 	// MPI_Barrier(MPI_COMM_WORLD);
-}
-MPI_Barrier(MPI_COMM_WORLD);
-MPI_Finalize();
-return 0;
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Finalize();
+	return 0;
 }
