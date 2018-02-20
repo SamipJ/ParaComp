@@ -1,5 +1,10 @@
 #include "hash.h"
 
+char* isalphabet(char* temp){
+	char* p;
+	for ( p=temp; *p; ++p) if(!isalpha(*p)) *p=' ';
+	return temp;
+}
 
 int hash(char *str,int m)
 {
@@ -295,8 +300,9 @@ wordDoc* fill_ht(char* name,int m,wordDoc* ht,stopWord* sw){
 		ht[j]=NULL;
 	}
 	while ((read = getline(&line, &len, entry_file)) != -1) {
+		line = isalphabet(line);
 		for (j = 1, str1 = line; ; j++, str1 = NULL) {
-			token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
+			token = strtok_r(str1," ;:\"'1234567890-(\t)”[]{}!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
 			if (token == NULL)
 				break;
 			for ( p=token; *p; ++p) *p = tolower(*p);
@@ -412,6 +418,7 @@ stopWord* makeStopWords(char* fname, int m){
 	char* key;
 	int j,k;
 	while ((read = getline(&line, &len, fp)) != -1) {
+		line = isalphabet(line);
 		for (j = 1, str1 = line; ; j++, str1 = NULL) {
 			token = strtok_r(str1," ;:\"'1234567890-(\t)[]{}”!$%^*&=_+/.@<>?/,0+\\|\n", &saveptr1);
 			if (token == NULL)

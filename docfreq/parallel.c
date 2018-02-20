@@ -17,13 +17,13 @@ int main(int argc, char **argv)
 	sprintf(pc, "%d", rank);
 	sqo = (char *)malloc(sizeof(char) * 2);
 	char *files=(char*)calloc(32,sizeof(char));
-	// strcpy(files,"files/");
+	strcpy(files,"files-1/");
 	// printf("%s\n",files);
 	strcpy(procid, strcat(strcat(strcpy(sqo, "["), pc), "]"));
-	strcpy(dirname, "files");
-	// files=strcat(files,pc);
+	// strcpy(dirname, "files");
+	files=strcat(files,pc);
 	// printf("%s\n",files);
-	// strcpy(dirname,files);
+	strcpy(dirname,files);
 	printf("%s\n",dirname);
 	lht = fill_lht(m, lht, dirname, procid);
 	// printWords(lht,m);
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	msgNode recvarr = NULL, recvdocs = NULL;
 	/* create a type for struct car */
 	const int nitems = 2;
-	int blocklengths[2] = {28, 1};
+	int blocklengths[2] = {150, 1};
 	MPI_Datatype types[2] = {MPI_CHAR, MPI_INT};
 	MPI_Datatype mpi_msg_type;
 	MPI_Aint offsets[2];
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
 				countarr = (int *)calloc(p, sizeof(int));
 			}
 
-			// printf("%d  %d\n",count,rank );
+			// printf("1 My Rank %d\n",rank );
 			MPI_Gather(&count, 1, MPI_INT, countarr, 1, MPI_INT, j, MPI_COMM_WORLD);
 
 			if (rank == j)
@@ -109,6 +109,7 @@ int main(int argc, char **argv)
 				recvarr = (msgNode)malloc(size * sizeof(msgnode));
 				// printf("size----%d\n",size);
 			}
+			// printf("2 My Rank %d\n",rank );
 			MPI_Gatherv(arr, count, mpi_msg_type, recvarr, countarr, displs, mpi_msg_type, j, MPI_COMM_WORLD);
 			free(arr);
 			if (rank == j)
@@ -116,12 +117,14 @@ int main(int argc, char **argv)
 				sum1 = 0;
 				countarr2 = (int *)malloc(p * sizeof(int));
 				displs2 = (int *)malloc(p * sizeof(int));
+				x=0;
 				for (k = 0; k < p; k++)
 				{
 					sum2 = 0;
 					for (k1 = 0; k1 < countarr[k]; k1++)
 					{
-						sum2 += recvarr[k1].num;
+						sum2 += recvarr[x].num;
+						x++;
 					}
 					countarr2[k] = sum2;
 					displs2[k] = sum1;
@@ -130,6 +133,8 @@ int main(int argc, char **argv)
 				recvdocs = (msgNode)malloc(sum1 * sizeof(msgnode));
 			}
 
+			// printf("3 My Rank %d\n",rank );
+			// printf("%d\n",sum);
 			MPI_Gatherv(sendDocData, sum, mpi_msg_type, recvdocs, countarr2, displs2, mpi_msg_type, j, MPI_COMM_WORLD);
 			free(sendDocData);
 			if (rank == j)
@@ -344,21 +349,20 @@ int main(int argc, char **argv)
 			}
 			
 		}
-		for(x=0;x<p;x++){
-			MPI_Barrier(MPI_COMM_WORLD);
-			if (rank!=x) continue;
-			temp = headWord;
-			while(temp!=NULL){
-				tempDoc = temp->docLink;
-				printf("%s word %d\n",temp->key,temp->size);
-				while(tempDoc!=NULL){
-					printf("\t%s doc %d\n",tempDoc->name,tempDoc->freq);
-					tempDoc=tempDoc->next;
-				}
-				temp=temp->next;
-			}
-		}
-		// printf("----------------%d\n",i+j);
+		// for(x=0;x<p;x++){
+		// 	MPI_Barrier(MPI_COMM_WORLD);
+		// 	if (rank!=x) continue;
+		// 	temp = headWord;
+		// 	while(temp!=NULL){
+		// 		tempDoc = temp->docLink;
+		// 		printf("%s word %d\n",temp->key,temp->size);
+		// 		while(tempDoc!=NULL){
+		// 			printf("\t%s doc %d\n",tempDoc->name,tempDoc->freq);
+		// 			tempDoc=tempDoc->next;
+		// 		}
+		// 		temp=temp->next;
+		// 	}
+		// }
 	}
 	// MPI_Barrier(MPI_COMM_WORLD);
 

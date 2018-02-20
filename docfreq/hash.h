@@ -48,7 +48,7 @@ typedef wordnode* wordNode;
 
 typedef struct msgnode
 {
-	char s[28];
+	char s[150];
 	int num;
 }msgnode;
 
