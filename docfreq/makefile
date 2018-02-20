@@ -7,7 +7,7 @@ run1: exe
 run2: exe
 	mpirun -np 2 ./exe
 
-gdb1: exe
+gdb: exe
 	mpirun -np 2 xterm -e gdb exe
 
 exe: hash.o parallel.o hash.h
