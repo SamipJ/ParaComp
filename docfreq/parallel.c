@@ -26,6 +26,19 @@ int main(int argc, char **argv)
 	strcpy(dirname,files);
 	printf("%s\n",dirname);
 	lht = fill_lht(m, lht, dirname, procid);
+	int i, count, j, k, size, sum, sum1, sum2, k1, x, y, z, indexdoc, indexword,size1,global_cnt;
+	global_cnt=0;
+	FILE * fp=NULL;
+ //   	// fp = fopen ("output", "w+");
+	// if(lht[157]!=NULL)
+	// 	printf("%s\n",lht[157]->key	);
+	// for(i=0;i<m;i++){
+	// 	if(lht[i]!=NULL){
+	// 		if(strcmp(lht[i]->key," ")==0){
+	// 			printf("hello\n");
+	// 		}
+	// 	}
+	// }
 	// printWords(lht,m);
 	free(procid);
 	free(pc);
@@ -33,7 +46,6 @@ int main(int argc, char **argv)
 	free(dirname);
 	free(files);
 	MPI_Request req,req1,req2,req3	;
-	int i, count, j, k, size, sum, sum1, sum2, k1, x, y, z, indexdoc, indexword,size1;
 	int *countarr = NULL, *countarr2 = NULL;
 	int *displs = NULL, *displs2 = NULL;
 	docNode temp2, headDoc,prevDoc,tempDoc,freeDoc;	
@@ -67,29 +79,35 @@ int main(int argc, char **argv)
 			sum = 0;
 			k = 0;
 			sendDocData=NULL;
+			if(temp!=NULL && strcmp(temp->key," ")==0){
+				printf("jhhgcchgvjhbjk %d %s\n",i+j,lht[i+j]->key);
+			}
 			while (temp != NULL)
 			{
 				count++;
+				if(strcmp(temp->key," ")==0){
+					printf("jhhgcchgvjhbjk\n");
+				}
 				arr = (msgNode)realloc(arr, sizeof(msgnode) * count);
 				strcpy(arr[count - 1].s, temp->key);
-				// free(temp->key);
+				free(temp->key);
 				// printf("%s  %d\n",arr[count-1].s,arr[count-1].num );
 				arr[count - 1].num = temp->size;
 				sum += temp->size;
 				sendDocData = (msgNode)realloc(sendDocData, sum * sizeof(msgnode));
 				temp2 = temp->docLink;
-				printf("hi----\n");
-				if(strcmp(temp->key,"epublicans")==0){
-					printf("fhello\n");
-				}
-				printf("%s\n",temp->key);
-				printf("%d\n",temp->size);
-				printf("%s\n",temp2->name);
+				// printf("hi----\n");
+				// if(strcmp(temp->key,"epublicans")==0){
+				// 	// printf("fhello\n");
+				// }
+				// printf("%s\n",temp->key);
+				// printf("%d\n",temp->size);
+				// printf("%s\n",temp2->name);
 				while (temp2 != NULL)
 				{
-					printf("hi\n");
-					printf("%s\n",temp->key);
-					printf("%s\n",temp2->name);
+					// printf("hi\n");
+					// printf("%s\n",temp->key);
+					// printf("%s\n",temp2->name);
 					strcpy(sendDocData[k].s, temp2->name);
 					sendDocData[k].num = temp2->freq;
 					freeDoc=temp2;
@@ -379,73 +397,9 @@ int main(int argc, char **argv)
 			free(recvarr);
 		}
 		
-		// if(rank!=0){
-		// 	// sendDocData = NULL;
-		// 	temp=headWord;
-		// 	sendDocData= (msgNode)malloc((sum1+size1)*sizeof(msgnode));
-		// 	count=0;
-		// 	printf("%d %d\n",size1,sum1);
-		// 	k=size1;
-		// 	while(temp!=NULL){
-		// 		count++;
-		// 		strcpy(sendDocData[count - 1].s, temp->key);
-		// 		// if(count==1) printf("%s %s\n",temp->key,sendDocData[count - 1].s);
-		// 		free(temp->key);
-		// 		sendDocData[count - 1].num = temp->size;
-		// 		temp2 = temp->docLink;
-		// 		while (temp2 != NULL)
-		// 		{
-		// 			strcpy(sendDocData[k].s, temp2->name);
-		// 			sendDocData[k].num = temp2->freq;
-		// 			freeDoc=temp2;
-		// 			temp2 = temp2->next;
-		// 			free(freeDoc);
-		// 			k++;
-		// 		}
-		// 		freeWord=temp;
-		// 		temp = temp->next;
-		// 		free(freeWord);
-		// 	}
-		// 	// printf("%s\n",sendDocData[0].s);
-		// 	msg[0]=rank;
-		// 	msg[1]=size1;
-		// 	msg[2]=sum1;
-		// 	printf("hi\n");
-		// 	for(i=0;i<sum1+size1;i++){
-		// 		printf("%d : %d %s\n",i,sendDocData[i].num,sendDocData[i].s);
-		// 	}
-		// 	// MPI_Send(msg, 3, MPI_INT, 0, 1, MPI_COMM_WORLD);
-		// 	printf("hi2\n");
-		// 	// MPI_Send(sendDocData,size1+sum1,mpi_msg_type,0,2,MPI_COMM_WORLD);
-		// 	free(sendDocData);
-		// 	printf("hi3\n");
-		// }
-		
-			
-			// if(rank==0){
-			// 	for(x=1;x<p;x++){
-			// 		MPI_Recv(msg, 3, MPI_INT, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status);
-			// 		recvarr = (msgNode)calloc(msg[1]+msg[2],sizeof(msgnode));
-			// 		MPI_Recv(recvarr,msg[1]+msg[2],mpi_msg_type,msg[0],2,MPI_COMM_WORLD,&status);
-			// 		free(recvarr);
-			// 	}
-
-			// 	// MPI_Irecv(&count,1,MPI_INT,j,123,MPI_COMM_WORLD,&req);
-			// 	// MPI_Wait(&req,MPI_STATUS_IGNORE);
-			// 	// arr=(msgNode)malloc(count*sizeof(msgnode));
-			// 	// MPI_Irecv(arr,count,mpi_msg_type,j,123,MPI_COMM_WORLD,&req);
-			// 	// MPI_Wait(&req,MPI_STATUS_IGNORE);
-			// 	// MPI_Irecv(&sum,1,MPI_INT,j,123,MPI_COMM_WORLD,&req);
-			// 	// MPI_Wait(&req,MPI_STATUS_IGNORE);
-			// 	// recvdocs=(msgNode)malloc(sum*sizeof(msgnode));
-			// 	// MPI_Irecv(recvdocs,sum,MPI_INT,j,123,MPI_COMM_WORLD,&req);
-			// 	// MPI_Wait(&req,MPI_STATUS_IGNORE);
-			// 	// free(recvdocs);
-			// 	// free(arr);
-			// }
 
 		// for(x=0;x<p;x++){
-		// 	MPI_Barrier(MPI_COMM_WORLD);
+		// 	// MPI_Barrier(MPI_COMM_WORLD);
 		// 	if (rank!=x) continue;
 		// 	// printf("---------%d\n",rank);
 		// 	temp = headWord;
@@ -459,6 +413,106 @@ int main(int argc, char **argv)
 		// 		temp=temp->next;
 		// 	}
 		// }	
+
+
+		if(rank!=0){
+			// sendDocData = NULL;
+			temp=headWord;
+			sendDocData= (msgNode)malloc((sum1+size1)*sizeof(msgnode));
+			count=0;
+			// printf("%d %d\n",size1,sum1);
+			k=size1;
+			while(temp!=NULL){
+				count++;
+				strcpy(sendDocData[count - 1].s, temp->key);
+				// if(count==1) printf("%s %s\n",temp->key,sendDocData[count - 1].s);
+				// free(temp->key);
+				sendDocData[count - 1].num = temp->size;
+				temp2 = temp->docLink;
+				while (temp2 != NULL)
+				{
+					strcpy(sendDocData[k].s, temp2->name);
+					sendDocData[k].num = temp2->freq;
+					freeDoc=temp2;
+					temp2 = temp2->next;
+					free(freeDoc);
+					k++;
+				}
+				freeWord=temp;
+				temp = temp->next;
+				free(freeWord);
+			}
+			// printf("%s\n",sendDocData[0].s);
+			msg[0]=rank;
+			msg[1]=size1;
+			msg[2]=sum1;
+			// printf("hi\n");
+			
+			MPI_Send(msg, 3, MPI_INT, 0, 1, MPI_COMM_WORLD);
+			// printf("hi2\n");
+			MPI_Send(sendDocData,size1+sum1,mpi_msg_type,0,2,MPI_COMM_WORLD);
+			free(sendDocData);
+			// printf("hi3\n");
+		}
+
+
+		if(rank==0){
+			temp=headWord;
+			while(temp!=NULL){
+				// count++;
+				if (global_cnt%1000000==0)fp = newFile(fp,global_cnt/1000000);
+				global_cnt++;
+				fprintf(fp, "%s:{\n",temp->key);
+
+				// strcpy(sendDocData[count - 1].s, temp->key);
+				// if(count==1) printf("%s %s\n",temp->key,sendDocData[count - 1].s);
+				free(temp->key);
+				// sendDocData[count - 1].num = temp->size;
+				temp2 = temp->docLink;
+				while (temp2 != NULL)
+				{
+					// strcpy(sendDocData[k].s, temp2->name);
+					// sendDocData[k].num = temp2->freq;
+					if(temp2->next==NULL) fprintf(fp, "\t%s:%d\n",temp2->name,temp2->freq );
+					else fprintf(fp, "\t%s:%d,\n",temp2->name,temp2->freq );
+					freeDoc=temp2;
+					temp2 = temp2->next;
+					free(freeDoc);
+				}
+				freeWord=temp;
+				temp = temp->next;
+				// if(temp==NULL)fprintf(fp, "\t}");
+				fprintf(fp, "}\n");
+				free(freeWord);
+			}
+
+			for(x=1;x<p;x++){
+				MPI_Recv(msg, 3, MPI_INT, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status);
+				recvarr = (msgNode)calloc(msg[1]+msg[2],sizeof(msgnode));
+				// printf("%d\n",msg[0] );
+				MPI_Recv(recvarr,msg[1]+msg[2],mpi_msg_type,msg[0],2,MPI_COMM_WORLD,&status);
+				// printf("%d\n",msg[0] );
+				// for(y=0;y<msg[1]+msg[2];y++){
+				// 	printf("%d : %d %s\n",y,recvarr[y].num,recvarr[y].s);
+				// }
+				k=msg[1];
+				for(y=0;y<msg[1];y++){
+					if (global_cnt%1000000==0)fp = newFile(fp,global_cnt/1000000);
+					global_cnt++;
+					fprintf(fp, "%s:{\n",recvarr[y].s);
+					for(z=0;z<recvarr[y].num;z++){
+						if(z==recvarr[y].num-1) fprintf(fp, "\t%s:%d\n",recvarr[k].s,recvarr[k].num );
+						else fprintf(fp, "\t%s:%d,\n",recvarr[k].s,recvarr[k].num );		
+						k++;
+					}
+					fprintf(fp, "}\n");
+				}
+				free(recvarr);
+
+			}
+
+		}
+			
 	}
 		
 	

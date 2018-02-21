@@ -307,6 +307,9 @@ wordDoc* fill_ht(char* name,int m,wordDoc* ht,stopWord* sw){
 				break;
 			for ( p=token; *p; ++p) *p = tolower(*p);
 			k=(hash(token,m));
+			if(strcmp(token," ")==0){
+				printf("jhvhgcghghj\n");
+			}
 			if(checkStopWord(token,k,sw)==0){
 				ht[k]=addWordDoc(token,ht[k]);
 			}
@@ -511,4 +514,15 @@ char* stringify(wordNode headWord,int ind,int rank){
 	// }
 	return string;
 }
-	
+
+FILE* newFile(FILE* fp,int count){
+	if(fp!=NULL) fclose(fp);
+	char filename[20];
+	char countchar[4];
+	sprintf(countchar,"%d",count);
+	strcpy(filename,"output");
+	strcat(filename,countchar);
+	fp=fopen(filename,"w+");
+	printf("Printing in %s\n",filename);
+	return fp;
+}

@@ -83,3 +83,5 @@ stopWord* makeStopWords(char* fname, int m);
 int checkStopWord(char* key,int hash, stopWord* sw);
 
 wordNode* fill_lht(int m,wordNode* lht,char* dirname,char* procid);
+
+FILE* newFile(FILE* fp,int count);
