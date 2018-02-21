@@ -3,7 +3,10 @@
 
 int main(int argc, char **argv)
 {
+	double t1,t2;
 	MPI_Init(&argc, &argv);
+    t1 = MPI_Wtime();
+	
 	int m, rank, p;
 	char *dirname, *procid, *pc, *sqo;
 	MPI_Comm_size(MPI_COMM_WORLD, &p);
@@ -519,7 +522,9 @@ int main(int argc, char **argv)
 	// MPI_Barrier(MPI_COMM_WORLD);
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	// printf("%d\n",rank);
+	t2 = MPI_Wtime();
+    printf("MPI_Wtime measured by process %d: %1.2f\n",rank, t2-t1);fflush(stdout);
+    // printf("%d\n",rank);
 	MPI_Finalize();
 	return 0;
 }

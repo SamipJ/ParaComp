@@ -220,6 +220,7 @@ int main(int argc, char** argv) {
 
     // Finalize the MPI environment.
     t2 = MPI_Wtime();
+    MPI_Barrier(MPI_COMM_WORLD);
     printf("MPI_Wtime measured by process %d: %1.2f\n",rank, t2-t1);fflush(stdout);
     MPI_Finalize();
     // printf("End\n");
