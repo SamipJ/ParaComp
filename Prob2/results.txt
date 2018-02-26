@@ -1,0 +1,16 @@
+mpirun -np 1 exe
+MPI_Wtime measured by process 0: 45.45 sec.
+mpirun -np 2 -hostfile hostlist --pernode exe
+MPI_Wtime measured by process 0: 38.31 sec.
+mpirun -np 4 -hostfile hostlist --pernode exe
+MPI_Wtime measured by process 0: 25.59 sec.
+mpirun -np 8 -hostfile hostlist --pernode exe
+MPI_Wtime measured by process 0: 16.53 sec.
+mpirun -np 16 -hostfile hostlist -npernode 2 exe
+MPI_Wtime measured by process 0: 15.50 sec.
+mpirun -np 32 -hostfile hostlist -npernode 4 exe
+MPI_Wtime measured by process 0: 15.29 sec.
+--------------------------------------------------------------------------
+mpirun noticed that process rank 25 with PID 0 on node node6 exited on signal 6 (Aborted).
+--------------------------------------------------------------------------
+makefile:9: recipe for target 'run32' failed
